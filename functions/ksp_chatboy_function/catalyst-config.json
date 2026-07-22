@@ -1,0 +1,13 @@
+{
+        "deployment": {
+                "name": "ksp_chatboy_function",
+                "stack": "python_3_11",
+                "type": "basicio",
+                "env_variables": {
+                        "GEMINI_API_KEY": "REPLACE_WITH_YOUR_OWN_KEY"
+                }
+        },
+        "execution": {
+                "main": "main.py"
+        }
+}

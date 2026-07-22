@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ವಾಣಿ · Vaani — KSP Crime Intelligence Console</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #12151a;
+    --ink-2: #1c2733;
+    --ink-3: #232f3d;
+    --paper: #e8e3d8;
+    --paper-dim: #9aa3ad;
+    --brass: #c9a24b;
+    --brass-dim: #8a713a;
+    --red-seal: #8a2e2e;
+    --green-ok: #4a7a5c;
+    --amber: #b8853a;
+  }
+
+  * { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background:
+      radial-gradient(ellipse at top, rgba(201,162,75,0.06), transparent 60%),
+      var(--ink);
+    color: var(--paper);
+    margin: 0;
+    min-height: 100vh;
+    padding: 32px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .letterhead {
+    width: 100%;
+    max-width: 640px;
+    text-align: center;
+    border-bottom: 1px solid rgba(201,162,75,0.25);
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .seal {
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 12px;
+    border: 2px solid var(--brass);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, serif;
+    font-size: 22px;
+    color: var(--brass);
+    position: relative;
+  }
+  .seal::before, .seal::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border: 1px dotted rgba(201,162,75,0.4);
+    border-radius: 50%;
+  }
+  .seal::after { inset: -10px; border-style: solid; border-width: 0.5px; }
+
+  .kannada-title {
+    font-size: 15px;
+    letter-spacing: 3px;
+    color: var(--brass);
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    margin: 0 0 6px;
+    color: var(--paper);
+  }
+
+  .subtitle {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+  }
+
+  .console {
+    width: 100%;
+    max-width: 640px;
+    background: linear-gradient(180deg, var(--ink-2), var(--ink-3));
+    border: 1px solid rgba(201,162,75,0.2);
+    border-radius: 4px;
+    padding: 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .lang-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 24px;
+    border: 1px solid rgba(201,162,75,0.3);
+    border-radius: 3px;
+    overflow: hidden;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .lang-btn {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 8px 18px;
+    background: transparent;
+    color: var(--paper-dim);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .lang-btn.active {
+    background: var(--brass);
+    color: var(--ink);
+    font-weight: bold;
+  }
+  .lang-btn:not(.active):hover { color: var(--paper); }
+
+  .mic-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0 24px;
+  }
+
+  .mic-btn {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--ink-3), var(--ink));
+    border: 2px solid var(--brass-dim);
+    color: var(--brass);
+    font-size: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease, transform 0.15s ease;
+  }
+  .mic-btn:hover { transform: scale(1.03); border-color: var(--brass); }
+  .mic-btn.listening {
+    border-color: var(--red-seal);
+    color: #d98a8a;
+    animation: rec-pulse 1.2s infinite;
+  }
+  @keyframes rec-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(138,46,46,0.55); }
+    70% { box-shadow: 0 0 0 18px rgba(138,46,46,0); }
+    100% { box-shadow: 0 0 0 0 rgba(138,46,46,0); }
+  }
+
+  .status-line {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--paper-dim);
+    margin-top: 12px;
+    min-height: 16px;
+    text-transform: uppercase;
+  }
+
+  .transcript {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--paper);
+    text-align: center;
+    min-height: 22px;
+    padding: 0 20px;
+    border-left: 2px solid var(--brass-dim);
+    border-right: 2px solid var(--brass-dim);
+    margin-top: 10px;
+  }
+
+  .type-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .type-row input {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    padding: 11px 14px;
+    background: var(--ink);
+    border: 1px solid rgba(201,162,75,0.25);
+    border-radius: 3px;
+    color: var(--paper);
+  }
+  .type-row input::placeholder { color: #566270; }
+  .type-row input:focus {
+    outline: none;
+    border-color: var(--brass);
+  }
+  .type-row button {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 0 20px;
+    background: var(--brass);
+    color: var(--ink);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .type-row button:hover { background: #d9b158; }
+
+  .case-file {
+    margin-top: 28px;
+    display: none;
+    animation: stamp-in 0.28s ease;
+  }
+  @keyframes stamp-in {
+    0% { opacity: 0; transform: scale(1.06); }
+    60% { opacity: 1; transform: scale(0.985); }
+    100% { transform: scale(1); }
+  }
+
+  .case-file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px dashed rgba(201,162,75,0.3);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .case-file-header .label {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--brass);
+    text-transform: uppercase;
+  }
+  .case-file-header .count {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--paper-dim);
+  }
+
+  .explanation {
+    font-size: 14px;
+    color: var(--paper);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  .sql-strip {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--green-ok);
+    background: rgba(0,0,0,0.25);
+    border-left: 2px solid var(--green-ok);
+    padding: 8px 12px;
+    margin-bottom: 18px;
+    word-break: break-word;
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .record-card {
+    background: rgba(0,0,0,0.18);
+    border: 1px solid rgba(201,162,75,0.15);
+    border-radius: 3px;
+    padding: 14px 16px;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+  }
+  .record-card .fir {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--brass);
+    letter-spacing: 1px;
+  }
+  .record-card .name {
+    font-size: 16px;
+    color: var(--paper);
+    grid-column: 1;
+  }
+  .record-card .meta {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--paper-dim);
+    grid-column: 1;
+  }
+  .badge {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    align-self: center;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 2px;
+    white-space: nowrap;
+    height: fit-content;
+    border: 1px solid currentColor;
+  }
+  .badge.pending { color: var(--amber); }
+  .badge.closed { color: var(--green-ok); }
+  .badge.investigation { color: #c97a7a; }
+
+  .empty-state {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--paper-dim);
+    text-align: center;
+    padding: 20px 0;
+    letter-spacing: 1px;
+  }
+
+  footer {
+    margin-top: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #445062;
+    text-align: center;
+  }
+  .save-btn {
+    margin-top: 16px;
+    width: 100%;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    padding: 10px;
+    background: transparent;
+    color: var(--brass);
+    border: 1px solid var(--brass-dim);
+    border-radius: 3px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .save-btn:hover { background: rgba(201,162,75,0.1); border-color: var(--brass); }
+</style>
+</head>
+<body>
+
+<div class="letterhead">
+  <div class="seal">KSP</div>
+  <div class="kannada-title">ವಾಣಿ</div>
+  <h1>Vaani — Crime Intelligence Console</h1>
+  <div class="subtitle">Conversational query interface · Karnataka State Police</div>
+</div>
+
+<div class="console">
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="langEn" data-lang="en-IN">ENGLISH</button>
+    <button class="lang-btn" id="langKn" data-lang="kn-IN">ಕನ್ನಡ</button>
+  </div>
+
+  <div class="mic-row">
+    <button id="micBtn" class="mic-btn" aria-label="Start voice query">●</button>
+    <div id="status" class="status-line">Awaiting query</div>
+    <div id="transcriptBox" class="transcript"></div>
+  </div>
+
+  <div class="type-row">
+    <input id="typeInput" type="text" placeholder="Or type your query — e.g. 'pending complaints'" />
+    <button id="typeBtn">Query</button>
+  </div>
+
+  <div id="caseFile" class="case-file">
+    <div class="case-file-header">
+      <span class="label" id="explanationLabel">Query result</span>
+      <span class="count" id="countLabel"></span>
+    </div>
+    <div class="explanation" id="explanation"></div>
+    <div class="sql-strip" id="sqlBox"></div>
+    <div class="cards" id="cardsContainer"></div>
+    <button class="save-btn" id="savePdfBtn">Save Conversation as PDF</button>
+  </div>
+</div>
+
+<footer>SESSION AUTHENTICATED · LOCAL QUERY LOG ONLY · PROTOTYPE BUILD</footer>
+
+<script>
+const API_URL = "https://project-rainfall-60079338735.development.catalystserverless.in/server/ksp_chatboy_function/execute";
+const SESSION_ID = "session-" + Math.random().toString(36).slice(2, 10);
+
+const micBtn = document.getElementById("micBtn");
+const statusEl = document.getElementById("status");
+const transcriptBox = document.getElementById("transcriptBox");
+const typeInput = document.getElementById("typeInput");
+const typeBtn = document.getElementById("typeBtn");
+const caseFile = document.getElementById("caseFile");
+const explanationEl = document.getElementById("explanation");
+const sqlBox = document.getElementById("sqlBox");
+const cardsContainer = document.getElementById("cardsContainer");
+const countLabel = document.getElementById("countLabel");
+const langEn = document.getElementById("langEn");
+const langKn = document.getElementById("langKn");
+
+let currentLang = "en-IN";
+
+[langEn, langKn].forEach(btn => {
+  btn.addEventListener("click", () => {
+    [langEn, langKn].forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentLang = btn.dataset.lang;
+    if (recognition) recognition.lang = currentLang;
+    statusEl.textContent = currentLang === "kn-IN" ? "ಕನ್ನಡ ಸಿದ್ಧ" : "Awaiting query";
+  });
+});
+
+let recognition;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = currentLang;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    micBtn.classList.add("listening");
+    statusEl.textContent = "Listening…";
+  };
+
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    transcriptBox.textContent = text;
+    sendQuery(text);
+  };
+
+  recognition.onerror = (event) => {
+    statusEl.textContent = "Mic error — try typing instead";
+  };
+
+  recognition.onend = () => {
+    micBtn.classList.remove("listening");
+    statusEl.textContent = "Awaiting query";
+  };
+
+  micBtn.addEventListener("click", () => {
+    recognition.lang = currentLang;
+    recognition.start();
+  });
+} else {
+  statusEl.textContent = "Voice input unsupported — use text query below";
+  micBtn.disabled = true;
+  micBtn.style.opacity = 0.35;
+}
+
+typeBtn.addEventListener("click", () => {
+  const text = typeInput.value.trim();
+  if (text) {
+    transcriptBox.textContent = text;
+    sendQuery(text);
+  }
+});
+typeInput.addEventListener("keydown", (e) => { if (e.key === "Enter") typeBtn.click(); });
+
+async function sendQuery(text) {
+  statusEl.textContent = "Retrieving case records…";
+  try {
+    const res = await fetch(`${API_URL}?text=${encodeURIComponent(text)}&session_id=${SESSION_ID}`);
+    const wrapper = await res.json();
+    const data = JSON.parse(wrapper.output);
+   renderResult(data);
+    logToConversation(text, data);
+    statusEl.textContent = "Query complete";
+  } catch (err) {
+    statusEl.textContent = "Unable to reach intelligence server";
+  }
+}
+
+function badgeClass(status) {
+  if (!status) return "";
+  const s = status.toLowerCase();
+  if (s.includes("pending")) return "pending";
+  if (s.includes("closed")) return "closed";
+  if (s.includes("investigation")) return "investigation";
+  return "";
+}
+
+function renderResult(data) {
+  caseFile.style.display = "block";
+  caseFile.style.animation = "none";
+  void caseFile.offsetWidth;
+  caseFile.style.animation = "";
+
+  explanationEl.textContent = data.explanation;
+  sqlBox.textContent = data.generated_sql;
+  countLabel.textContent = `${data.result_count} RECORD${data.result_count === 1 ? "" : "S"}`;
+
+  if (!data.results || data.results.length === 0) {
+    cardsContainer.innerHTML = `<div class="empty-state">— NO MATCHING RECORDS —</div>`;
+    return;
+  }
+
+  if (data.results.length === 1 && "total" in data.results[0]) {
+    cardsContainer.innerHTML = `<div class="empty-state" style="font-size:28px; color:var(--brass);">${data.results[0].total}</div>`;
+    return;
+  }
+
+  cardsContainer.innerHTML = data.results.map(row => `
+    <div class="record-card">
+      <div class="fir">${row.fir_number || ""}</div>
+      <div class="name">${row.complainant_name || ""}</div>
+      <div class="meta">${row.complaint_type || ""} · ${row.station || ""} · ${row.date_filed || ""}</div>
+      <div class="badge ${badgeClass(row.status)}">${row.status || ""}</div>
+    </div>
+  `).join("");
+}
+let conversationLog = [];
+
+function logToConversation(question, data) {
+  conversationLog.push({
+    question: question,
+    explanation: data.explanation,
+    sql: data.generated_sql,
+    resultCount: data.result_count,
+    results: data.results,
+    timestamp: new Date().toLocaleString()
+  });
+}
+
+document.getElementById("savePdfBtn").addEventListener("click", () => {
+  if (conversationLog.length === 0) {
+    alert("No queries yet to save.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = 20;
+
+  doc.setFont("times", "bold");
+  doc.setFontSize(16);
+  doc.text("Vaani -- KSP Crime Intelligence Console", 15, y);
+  y += 7;
+  doc.setFontSize(10);
+  doc.setFont("times", "normal");
+  doc.text("Conversation Log -- Generated " + new Date().toLocaleString(), 15, y);
+  y += 10;
+
+  conversationLog.forEach((entry, idx) => {
+    if (y > 260) { doc.addPage(); y = 20; }
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(12);
+    doc.text(`${idx + 1}. Query: ${entry.question}`, 15, y);
+    y += 6;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(10);
+    const explLines = doc.splitTextToSize(entry.explanation, 180);
+    doc.text(explLines, 15, y);
+    y += explLines.length * 5;
+
+    doc.setFont("courier", "normal");
+    doc.setFontSize(8);
+    doc.text(`SQL: ${entry.sql}`, 15, y);
+    y += 5;
+    doc.text(`Results: ${entry.resultCount} record(s)`, 15, y);
+    y += 5;
+
+    entry.results.slice(0, 5).forEach(row => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      const line = Object.entries(row).map(([k, v]) => `${k}: ${v}`).join("  |  ");
+      const rowLines = doc.splitTextToSize(line, 180);
+      doc.text(rowLines, 18, y);
+      y += rowLines.length * 4;
+    });
+
+    y += 6;
+  });
+
+  doc.save(`vaani-conversation-${Date.now()}.pdf`);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "targets": [
+      "ksp_chatboy_function"
+    ],
+    "ignore": [],
+    "source": "functions"
+  },
+  "client": {
+    "source": "client"
+  }
+}

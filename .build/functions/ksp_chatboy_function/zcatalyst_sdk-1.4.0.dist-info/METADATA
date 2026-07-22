@@ -1,0 +1,66 @@
+Metadata-Version: 2.1
+Name: zcatalyst_sdk
+Version: 1.4.0
+Summary: Zoho Catalyst SDK for Python
+Home-page: https://catalyst.zoho.com/
+Author: Catalyst by Zoho
+Author-email: support@zohocatalyst.com
+License: Apache License 2.0
+Keywords: zcatalyst,zoho,catalyst,serverless,cloud,SDK,development
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Requires-Python: >= 3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests~=2.34.2
+Requires-Dist: typing-extensions~=4.12.1
+
+<a href="https://zoho.com/catalyst/">
+    <img width="150" height="150" src="https://static.zohocdn.com/catalyst-cdn/img/Catalyst-Logo-857518f26c.svg">
+</a>
+
+<h1>ZCatalyst SDK</h1>
+
+<p>
+  The official python sdk of Catalyst by Zoho
+</p>
+<br>
+
+![PyPI](https://img.shields.io/pypi/v/zcatalyst_sdk)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/zcatalyst_sdk)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/zcatalyst_sdk)
+![PyPI - License](https://img.shields.io/pypi/l/zcatalyst_sdk)
+
+ZCatalyst Python SDK bundles all the features of Zoho Catalyst and provides access to various Catalyst services and their respective components, which helps you build robust Catalyst applications and microservices.
+
+## Prerequisites
+
+To start working with this SDK you need a catalyst account [Sign Up](https://catalyst.zoho.com/)
+
+Then you need to install suitable version of [Python](https://www.python.org/) and [pip](https://pip.pypa.io/en/stable/installation/)
+
+## Installing
+
+The ZCatalyst Python SDK is a pip package and can be found as zcatalyst on PyPI:
+
+```bash
+python -m pip install zcatalyst-sdk
+```
+
+## Using zcatalyst
+
+After installing zcatalyst, you can initialize it in your catalyst functions as:
+
+```python
+import zcatalyst_sdk
+
+catalyst_app = zcatalyst_sdk.initialize()
+```
+
+## Documentation
+
+For documentation and further clarifications kindly contanct [support@zohocatalyst.com](mailto:support@zohocatalyst.com)
