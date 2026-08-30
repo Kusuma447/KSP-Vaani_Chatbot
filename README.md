@@ -168,6 +168,7 @@ Architecture
                                   |
                                   v
                          Investigator
+```
 Core Design Principle
 
 Vaani is not an LLM wrapped around a database.
@@ -302,6 +303,22 @@ Zoho Catalyst CLI
 Catalyst account
 Access to the required Catalyst project
 Required environment variables for Gemini functionality when open-ended query generation is used
+Clone
+git clone https://github.com/Kusuma447/KSP-Vaani_Chatbot.git
+cd KSP-Vaani_Chatbot
+Catalyst
+
+Authenticate with Catalyst and configure the project using the Catalyst project configuration included in the repository.
+
+Deploy
+catalyst deploy
+
+For frontend-only updates:
+
+catalyst deploy --only client
+
+For backend updates, deploy the configured Catalyst function.
+
 Prototype Scope
 
 The prototype uses the available KSP reference crime dataset and focuses on a working conversational investigation workflow across the supported crime-intelligence paths.
@@ -314,3 +331,13 @@ Kusuma Uppalapati
 Jahnavi Kesanapalli
 
 Sri Vasavi Engineering College (SVEC), Tadepalligudem
+
+
+
+
+
+
+
+
+
+
