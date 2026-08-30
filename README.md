@@ -212,6 +212,7 @@ An investigator can start with a case and progressively move toward:
 Who → Where → What connects → What's missing → What should happen next
 
 while preserving the active investigation context.
+```text
 
 Technology Stack
 Layer	Technology
@@ -228,7 +229,10 @@ PDF Export	jsPDF
 Authentication	Catalyst Hosted Authentication
 Authorization	Catalyst Role-Based Access
 Audit	Application Audit Trail
-Project Structure
+```
+Project 
+```text
+
 KSP-Vaani_Chatbot/
 │
 ├── client/
@@ -247,6 +251,8 @@ KSP-Vaani_Chatbot/
 ├── catalyst.json
 ├── .gitignore
 └── README.md
+```
+
 Security
 
 The deployed application uses Catalyst Hosted Authentication.
@@ -274,6 +280,8 @@ Likewise, hotspot and proactive-signal outputs are presented as evidence-backed 
 Demo Investigation Flow
 
 The recommended demonstration follows one continuous investigation:
+```text
+
 
 Investigate FIR-004
         ↓
@@ -293,6 +301,7 @@ Evidence & Method
 Authentication / RBAC / Audit
         ↓
 Save Conversation as PDF
+```
 
 This demonstrates how Vaani moves from a single question to a deeper, evidence-backed investigation without switching between separate tools.
 
