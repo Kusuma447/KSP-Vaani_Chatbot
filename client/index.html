@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&display=swap" rel="stylesheet">
 <title>ವಾಣಿ · Vaani — KSP Crime Intelligence Console</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <style>
   :root {
     --ink: #12151a;
@@ -26,7 +30,7 @@
   }
 
   body {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background:
       radial-gradient(ellipse at top, rgba(201,162,75,0.06), transparent 60%),
       var(--ink);
@@ -58,7 +62,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: Georgia, serif;
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 22px;
     color: var(--brass);
     position: relative;
@@ -73,6 +77,7 @@
   .seal::after { inset: -10px; border-style: solid; border-width: 0.5px; }
 
   .kannada-title {
+    font-family: 'Noto Sans Kannada', sans-serif;
     font-size: 15px;
     letter-spacing: 3px;
     color: var(--brass);
@@ -357,6 +362,595 @@
     text-transform: uppercase;
   }
   .save-btn:hover { background: rgba(201,162,75,0.1); border-color: var(--brass); }
+  .relationship-card {
+    background: rgba(0,0,0,0.14);
+    border: 1px solid rgba(201,162,75,0.18);
+    border-radius: 5px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .relationship-person {
+    color: var(--brass);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.8px;
+  }
+  .relationship-reason {
+    font-size: 12px;
+    margin-top: 4px;
+    color: var(--paper);
+  }
+  .relationship-strength {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--paper-dim);
+  }
+  .relationship-cases {
+    margin-top: 6px;
+  }
+
+  .network-header {
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(201,162,75,0.18);
+  border-radius: 12px;
+}
+
+.network-stats {
+  margin-top: 6px;
+  opacity: 0.75;
+}
+
+.network-title {
+  margin: 18px 0 10px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  opacity: 0.7;
+}
+
+.network-case {
+  display: inline-block;
+  padding: 10px 14px;
+  margin: 4px;
+  border: 1px solid rgba(201,162,75,0.18);
+  border-radius: 10px;
+}
+
+.network-chip {
+  display: inline-block;
+  padding: 5px 9px;
+  margin: 3px;
+  border: 1px solid rgba(201,162,75,0.18);
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.network-person {
+  margin-top: 8px;
+}
+.network-graph {
+  margin: 18px 0 22px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(201,162,75,0.18);
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.network-graph svg {
+  display: block;
+  width: 100%;
+  min-width: 560px;
+  height: 340px;
+}
+
+.graph-edge {
+  stroke: rgba(201,162,75,0.35);
+  stroke-width: 1.5;
+}
+
+.graph-person {
+  fill: var(--brass);
+}
+
+.graph-case {
+  fill: var(--ink-3);
+  stroke: var(--brass);
+  stroke-width: 1.2;
+}
+
+.graph-label {
+  fill: var(--paper);
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.graph-case-label {
+  fill: var(--paper-dim);
+  font-size: 10px;
+}
+
+  .early-warning-summary { margin-top: 8px; }
+  .warning-headline { font-size: 14px; line-height: 1.55; color: var(--paper); margin-bottom: 14px; }
+  .warning-card { background: rgba(0,0,0,.16); border: 1px solid rgba(201,162,75,.16); border-left: 4px solid var(--brass-dim); border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; }
+  .warning-card.high { border-left-color: #c97a7a; }
+  .warning-card.medium { border-left-color: var(--amber); }
+  .warning-top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:7px; }
+  .warning-severity { font-family:'Courier New',monospace; font-size:10px; letter-spacing:1.5px; padding:4px 8px; border:1px solid currentColor; border-radius:3px; }
+  .warning-severity.high { color:#d98a8a; }
+  .warning-severity.medium { color:var(--amber); }
+  .warning-score { font-family:'Courier New',monospace; font-size:10px; color:var(--paper-dim); }
+  .warning-title { font-family:'Courier New',monospace; font-size:12px; color:var(--brass); letter-spacing:.8px; margin-bottom:5px; }
+  .warning-subject { font-size:16px; color:var(--paper); margin-bottom:6px; }
+  .warning-evidence { font-size:12px; line-height:1.5; color:var(--paper-dim); }
+  .warning-lead { margin-top:9px; padding-top:9px; border-top:1px dashed rgba(201,162,75,.2); font-size:12px; line-height:1.5; color:var(--paper); }
+  .warning-lead strong { color:var(--brass); font-family:'Courier New',monospace; font-size:10px; letter-spacing:1px; }
+  .warning-cases { margin-top:8px; }
+  .warning-case-chip { display:inline-block; padding:4px 8px; margin:2px 4px 2px 0; border:1px solid rgba(201,162,75,.18); border-radius:999px; font-family:'Courier New',monospace; font-size:10px; color:var(--paper-dim); }
+  .warning-method { margin-top:14px; font-family:'Courier New',monospace; font-size:10px; line-height:1.5; color:#687582; }
+
+
+  .evidence-panel {
+    margin: 0 0 18px;
+    border: 1px solid rgba(201,162,75,0.18);
+    background: rgba(0,0,0,0.12);
+    border-radius: 5px;
+  }
+  .evidence-panel summary {
+    cursor: pointer;
+    padding: 10px 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 1.3px;
+    color: var(--brass);
+    text-transform: uppercase;
+    list-style: none;
+  }
+  .evidence-panel summary::-webkit-details-marker { display: none; }
+  .evidence-panel summary::after {
+    content: ' +';
+    float: right;
+    color: var(--paper-dim);
+  }
+  .evidence-panel[open] summary::after { content: ' −'; }
+  .evidence-body { padding: 0 12px 12px; }
+  .evidence-item {
+    padding: 8px 0;
+    border-top: 1px solid rgba(201,162,75,0.09);
+  }
+  .evidence-label {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--paper-dim);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .evidence-value {
+    font-size: 12px;
+    color: var(--paper);
+    line-height: 1.45;
+  }
+  .evidence-chip {
+    display: inline-block;
+    margin: 3px 4px 0 0;
+    padding: 4px 7px;
+    border: 1px solid rgba(201,162,75,0.15);
+    border-radius: 999px;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: var(--paper-dim);
+  }
+
+  .case-intel-header{background:rgba(0,0,0,.18);border:1px solid rgba(201,162,75,.2);border-radius:6px;padding:18px;margin-bottom:14px}
+  .case-intel-title{font-family:'Courier New',monospace;color:var(--brass);font-size:13px;letter-spacing:1.5px}
+  .intel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+  .intel-box{background:rgba(0,0,0,.16);border:1px solid rgba(201,162,75,.14);border-radius:5px;padding:12px}
+  .intel-label{font-family:'Courier New',monospace;font-size:10px;letter-spacing:1.2px;color:var(--paper-dim);text-transform:uppercase;margin-bottom:5px}
+  .intel-value{font-size:14px;color:var(--paper)}
+  .intel-section{margin-top:18px}
+  .intel-section-title{font-family:'Courier New',monospace;font-size:11px;letter-spacing:1.4px;color:var(--brass);margin-bottom:9px}
+  .intel-row{background:rgba(0,0,0,.14);border-left:2px solid rgba(201,162,75,.28);padding:9px 11px;margin-bottom:7px}
+  .intel-note{font-size:13px;line-height:1.55;color:var(--paper)}
+  .intel-row strong{color:var(--paper)}
+  .signal{display:inline-block;margin:3px 5px 3px 0;padding:5px 8px;border:1px solid rgba(201,162,75,.2);border-radius:999px;font-family:'Courier New',monospace;font-size:10px;color:var(--paper-dim)}
+  @media (max-width:560px){.intel-grid{grid-template-columns:1fr}}
+
+  /* =========================
+     ANALYTICS VISUALIZATION
+     ========================= */
+  .analytics-summary {
+    background: rgba(0,0,0,.16);
+    border: 1px solid rgba(201,162,75,.18);
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .analytics-title {
+    font-family: 'Courier New', monospace;
+    color: var(--brass);
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .analytics-total {
+    margin-top: 7px;
+    color: var(--paper-dim);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+  }
+
+  .bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 1.1fr) 3fr auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bar-label {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--paper);
+    word-break: break-word;
+  }
+
+  .bar-track {
+    height: 18px;
+    background: rgba(0,0,0,.28);
+    border: 1px solid rgba(201,162,75,.12);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--brass);
+    min-width: 2px;
+  }
+
+  .bar-value {
+    min-width: 28px;
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--brass);
+  }
+
+  .grouped-bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .grouped-bar-group {
+    background: rgba(0,0,0,.12);
+    border: 1px solid rgba(201,162,75,.12);
+    border-radius: 6px;
+    padding: 12px;
+  }
+
+  .grouped-bar-title {
+    color: var(--brass);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .grouped-bar-row {
+    display: grid;
+    grid-template-columns: minmax(80px, 110px) 1fr 28px;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+  }
+
+  .grouped-bar-label {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--paper-dim);
+  }
+
+  .analytics-table {
+    margin-top: 18px;
+    border-top: 1px dashed rgba(201,162,75,.22);
+    padding-top: 12px;
+  }
+
+  .analytics-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(201,162,75,.08);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+  }
+
+  .analytics-row:last-child {
+    border-bottom: none;
+  }
+
+  .analytics-row-count {
+    color: var(--brass);
+  }
+
+  @media (max-width: 560px) {
+    .bar-row {
+      grid-template-columns: 1fr auto;
+    }
+
+    .bar-track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+
+  /* =========================
+     SPATIAL HOTSPOT MAP
+     ========================= */
+  .hotspot-map-wrap {
+    margin-top: 18px;
+    border: 1px solid rgba(201,162,75,.18);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #111820;
+  }
+
+  .hotspot-map {
+    width: 100%;
+    height: 390px;
+  }
+
+  .hotspot-legend {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-top: 1px solid rgba(201,162,75,.14);
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--paper-dim);
+  }
+
+  .hotspot-legend strong {
+    color: var(--brass);
+  }
+
+  .hotspot-fallback {
+    padding: 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--paper-dim);
+  }
+
+  .hotspot-fallback .fallback-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(201,162,75,.08);
+  }
+
+  .leaflet-container {
+    background: #151d25;
+    font-family: 'Courier New', monospace;
+  }
+
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip {
+    background: #1b2632;
+    color: #e8e3d8;
+  }
+
+  .leaflet-popup-content {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    margin: 10px 12px;
+  }
+
+  .leaflet-control-zoom a,
+  .leaflet-control-attribution {
+    background: rgba(18,21,26,.88) !important;
+    color: #9aa3ad !important;
+  }
+
+  .leaflet-control-zoom a {
+    color: #c9a24b !important;
+  }
+
+  .hotspot-popup-title {
+    color: #c9a24b;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .hotspot-popup-count {
+    color: #e8e3d8;
+    margin-bottom: 6px;
+  }
+
+  .hotspot-popup-list {
+    margin: 0;
+    padding-left: 16px;
+  }
+
+
+  .governance-bar {
+    margin-top: 18px;
+    padding: 9px 12px;
+    border: 1px solid rgba(201,162,75,0.18);
+    background: rgba(0,0,0,0.14);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--paper-dim);
+    text-transform: uppercase;
+  }
+  .governance-bar.ok { color: #8fc69f; border-color: rgba(74,122,92,0.35); }
+  .governance-bar.dev { color: var(--amber); border-color: rgba(184,133,58,0.35); }
+  .governance-bar.denied { color: #d98a8a; border-color: rgba(138,46,46,0.5); }
+  .auth-notice {
+    display: none;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(138,46,46,0.5);
+    background: rgba(138,46,46,0.08);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #d98a8a;
+    line-height: 1.5;
+  }
+
+  /* ------------------------------------------------------------
+     Minimal finalist UI refinement
+     ------------------------------------------------------------ */
+  .console {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .type-row input,
+  .type-row button,
+  .lang-btn,
+  .mic-btn,
+  .save-btn {
+    transition: border-color 0.2s ease, background 0.2s ease,
+                box-shadow 0.2s ease, transform 0.15s ease;
+  }
+
+  .type-row input:focus {
+    box-shadow: 0 0 0 3px rgba(201,162,75,0.08);
+  }
+
+  .type-row button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  }
+
+  .type-row button:active {
+    transform: translateY(0);
+  }
+
+  .record-card,
+  .relationship-card,
+  .intel-box,
+  .intel-row,
+  .network-case {
+    transition: border-color 0.2s ease, transform 0.15s ease,
+                background 0.2s ease;
+  }
+
+  .record-card:hover,
+  .relationship-card:hover,
+  .intel-box:hover,
+  .network-case:hover {
+    border-color: rgba(201,162,75,0.32);
+    background: rgba(0,0,0,0.23);
+  }
+
+  .status-line {
+    transition: color 0.2s ease;
+  }
+
+  .lang-btn[data-lang="kn-IN"],
+  .lang-btn[data-lang="kn-IN"]:not(.active):hover {
+    font-family: 'Noto Sans Kannada', sans-serif;
+  }
+
+  .kannada-title {
+    line-height: 1.3;
+  }
+
+  .sql-strip {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .case-file {
+    scroll-margin-top: 18px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .type-row input,
+    .type-row button,
+    .lang-btn,
+    .mic-btn,
+    .save-btn,
+    .record-card,
+    .relationship-card,
+    .intel-box,
+    .intel-row,
+    .network-case {
+      transition: none;
+    }
+  }
+
+
+  /* ===== Final investigator workspace refinements ===== */
+  .conversation-context {
+    display:flex; flex-wrap:wrap; align-items:center; gap:7px;
+    min-height:24px; margin:0 0 12px;
+  }
+  .context-label { font:9px 'Courier New',monospace; letter-spacing:1.2px; color:var(--paper-dim); text-transform:uppercase; }
+  .context-chip {
+    display:inline-flex; align-items:center; gap:5px; padding:5px 9px;
+    border:1px solid rgba(201,162,75,.2); border-radius:999px;
+    background:rgba(201,162,75,.05); color:var(--paper);
+    font:10px 'Courier New',monospace;
+  }
+  .context-chip strong { color:var(--brass); font-weight:500; }
+  .workspace-intro {
+    margin:0 0 14px; padding:12px 14px;
+    border:1px solid rgba(201,162,75,.14); border-left:3px solid var(--brass);
+    border-radius:7px; background:rgba(0,0,0,.12);
+  }
+  .workspace-intro-kicker { font:9px 'Courier New',monospace; letter-spacing:1.3px; color:var(--brass); text-transform:uppercase; }
+  .workspace-intro-text { margin-top:5px; font-size:13px; line-height:1.5; color:var(--paper); }
+  .query-meta {
+  .query-meta {
+    display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;
+    margin:0 0 14px;
+  }
+  .query-meta-card {
+    background:rgba(0,0,0,.14); border:1px solid rgba(201,162,75,.14);
+    border-radius:6px; padding:9px 11px; min-height:46px;
+  }
+  .query-meta-label { font-family:'Courier New',monospace; font-size:9px; letter-spacing:1.1px; color:var(--paper-dim); text-transform:uppercase; }
+  .query-meta-value { margin-top:4px; font-size:12px; color:var(--paper); line-height:1.35; }
+  .query-meta-value.accent { color:var(--brass); }
+  .sql-collapsible { margin-bottom:14px; }
+  .sql-collapsible summary { cursor:pointer; font-family:'Courier New',monospace; font-size:9px; letter-spacing:1.2px; color:var(--paper-dim); }
+  .sql-collapsible pre { white-space:pre-wrap; margin:8px 0 0; font:10px/1.5 'Courier New',monospace; color:var(--green-ok); background:rgba(0,0,0,.22); padding:10px; border-left:2px solid var(--green-ok); overflow:auto; }
+  .intel-section { border-top:1px solid rgba(201,162,75,.08); padding-top:14px; }
+  .investigator-banner { padding:13px 15px; border-left:3px solid var(--brass); background:rgba(201,162,75,.06); border-radius:6px; margin-bottom:14px; }
+  .investigator-banner strong { color:var(--brass); font-family:'Courier New',monospace; font-size:10px; letter-spacing:1.2px; }
+  .cross-card { background:rgba(0,0,0,.15); border:1px solid rgba(201,162,75,.16); border-radius:7px; padding:14px 15px; margin-bottom:10px; }
+  .cross-card-top { display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
+  .cross-person { color:var(--brass); font-size:15px; }
+  .cross-location { color:var(--paper-dim); font:10px 'Courier New',monospace; }
+  .cross-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px; }
+  .cross-stat { background:rgba(0,0,0,.15); border-radius:5px; padding:8px; }
+  .cross-stat-label { color:var(--paper-dim); font:9px 'Courier New',monospace; text-transform:uppercase; letter-spacing:1px; }
+  .cross-stat-value { color:var(--paper); margin-top:3px; font-size:12px; }
+  .cross-cases { margin-top:9px; }
+  .cross-chip { display:inline-block; margin:2px 5px 2px 0; padding:4px 7px; border:1px solid rgba(201,162,75,.18); border-radius:999px; font:10px 'Courier New',monospace; color:var(--paper-dim); }
+  @media (max-width:560px) { .query-meta,.cross-grid{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -381,26 +975,33 @@
   </div>
 
   <div class="type-row">
-    <input id="typeInput" type="text" placeholder="Or type your query — e.g. 'pending complaints'" />
+    <input id="typeInput" type="text" placeholder="Ask about FIRs, people, places, patterns or a case…" />
     <button id="typeBtn">Query</button>
   </div>
 
   <div id="caseFile" class="case-file">
     <div class="case-file-header">
-      <span class="label" id="explanationLabel">Query result</span>
+      <span class="label" id="explanationLabel">INTELLIGENCE RESULT</span>
       <span class="count" id="countLabel"></span>
     </div>
+    <div id="conversationContext" class="conversation-context"></div>
+    <div id="queryMeta" class="query-meta"></div>
     <div class="explanation" id="explanation"></div>
-    <div class="sql-strip" id="sqlBox"></div>
+    <div id="sqlBoxWrap"></div>
+    <div id="evidencePanel"></div>
     <div class="cards" id="cardsContainer"></div>
     <button class="save-btn" id="savePdfBtn">Save Conversation as PDF</button>
   </div>
 </div>
 
-<footer>SESSION AUTHENTICATED · LOCAL QUERY LOG ONLY · PROTOTYPE BUILD</footer>
+<div id="governanceBar" class="governance-bar dev">LOCAL DEVELOPMENT · AUTH NOT ENFORCED · ADMIN DEV SCOPE · AUDIT PENDING</div>
+<div id="authNotice" class="auth-notice"></div>
 
+<footer>CATALYST AUTHENTICATION · ROLE-BASED ACCESS · AUDIT TRACE</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-const API_URL = "https://project-rainfall-60079338735.development.catalystserverless.in/server/ksp_chatboy_function/execute";
+const API_URL = "/server/ksp_chatboy_function/execute";
 const SESSION_ID = "session-" + Math.random().toString(36).slice(2, 10);
 
 const micBtn = document.getElementById("micBtn");
@@ -410,13 +1011,20 @@ const typeInput = document.getElementById("typeInput");
 const typeBtn = document.getElementById("typeBtn");
 const caseFile = document.getElementById("caseFile");
 const explanationEl = document.getElementById("explanation");
-const sqlBox = document.getElementById("sqlBox");
 const cardsContainer = document.getElementById("cardsContainer");
 const countLabel = document.getElementById("countLabel");
+const queryMeta = document.getElementById("queryMeta");
+const conversationContext = document.getElementById("conversationContext");
+const sqlBoxWrap = document.getElementById("sqlBoxWrap");
+const evidencePanel = document.getElementById("evidencePanel");
 const langEn = document.getElementById("langEn");
 const langKn = document.getElementById("langKn");
+const governanceBar = document.getElementById("governanceBar");
+const authNotice = document.getElementById("authNotice");
 
 let currentLang = "en-IN";
+let clientConversationContext = (() => { try { return JSON.parse(sessionStorage.getItem("vaani_context") || "{}"); } catch (_) { return {}; } })();
+let hotspotMap = null;
 
 [langEn, langKn].forEach(btn => {
   btn.addEventListener("click", () => {
@@ -475,17 +1083,121 @@ typeBtn.addEventListener("click", () => {
 });
 typeInput.addEventListener("keydown", (e) => { if (e.key === "Enter") typeBtn.click(); });
 
+function renderGovernance(data) {
+  if (!governanceBar) return;
+
+  const governance = data.governance || {};
+  const authenticated = !!governance.authenticated;
+  const role = governance.role || "Unknown role";
+  const audited = !!governance.audit_recorded;
+  const enforced = !!governance.auth_enforced;
+
+  governanceBar.className = "governance-bar " + (
+    enforced && authenticated ? "ok" :
+    enforced && !authenticated ? "denied" :
+    authenticated ? "ok" : "dev"
+  );
+
+  const dataScope = governance.data_scope || (enforced ? "user" : "admin-dev");
+
+  governanceBar.textContent = authenticated
+    ? `CATALYST AUTHENTICATED · ${role} · DATA SCOPE ${dataScope.toUpperCase()} · AUDIT ${audited ? "RECORDED" : "PENDING"}`
+    : enforced
+      ? `ACCESS DENIED · CATALYST LOGIN REQUIRED · USER SCOPE · AUDIT ${audited ? "RECORDED" : "PENDING"}`
+      : `LOCAL DEVELOPMENT · AUTH NOT ENFORCED · ADMIN DEV SCOPE · AUDIT ${audited ? "RECORDED" : "PENDING"}`;
+
+  if (authNotice) {
+    if (data.query_type === "auth_error") {
+      authNotice.style.display = "block";
+      authNotice.textContent = data.explanation || "Authentication required.";
+    } else {
+      authNotice.style.display = "none";
+      authNotice.textContent = "";
+    }
+  }
+}
+
+
 async function sendQuery(text) {
   statusEl.textContent = "Retrieving case records…";
+
   try {
-    const res = await fetch(`${API_URL}?text=${encodeURIComponent(text)}&session_id=${SESSION_ID}`);
-    const wrapper = await res.json();
-    const data = JSON.parse(wrapper.output);
-   renderResult(data);
-    logToConversation(text, data);
-    statusEl.textContent = "Query complete";
+    const res = await fetch(
+      `${API_URL}?text=${encodeURIComponent(text)}&session_id=${SESSION_ID}&context=${encodeURIComponent(JSON.stringify(clientConversationContext))}`
+    );
+
+    const raw = await res.text();
+
+    console.log("VAANI HTTP STATUS:", res.status);
+    console.log("VAANI RAW RESPONSE:", raw);
+
+    if (!res.ok) {
+      throw new Error(`Server returned HTTP ${res.status}`);
+    }
+
+    let body;
+
+    try {
+      body = JSON.parse(raw);
+    } catch (parseError) {
+      throw new Error("Server returned a non-JSON response.");
+    }
+
+    let data;
+
+    if (body && typeof body.output === "string") {
+      try {
+        data = JSON.parse(body.output);
+      } catch (parseError) {
+        throw new Error("Catalyst returned an invalid function output.");
+      }
+    } else if (body && typeof body === "object") {
+      data = body;
+    } else {
+      throw new Error("Unexpected response format from server.");
+    }
+
+    caseFile.style.display = "block";
+    renderGovernance(data);
+    renderConversationContext(data);
+    renderQueryMeta(data);
+    explanationEl.textContent = data.explanation || "";
+
+    countLabel.textContent =
+      `${data.result_count || 0} RECORD${data.result_count === 1 ? "" : "S"}`;
+
+    clientConversationContext = data.conversation_context || clientConversationContext;
+    try { sessionStorage.setItem("vaani_context", JSON.stringify(clientConversationContext)); } catch (_) {}
+    renderExplainability(data);
+
+    renderResults(data);
+
+    if (data.query_type === "gemini_unavailable" || data.query_type === "gemini_error") {
+      statusEl.textContent = data.query_type === "gemini_unavailable"
+        ? "Language engine temporarily unavailable"
+        : "Language engine error";
+    } else {
+      statusEl.textContent = "Query complete";
+    }
+
   } catch (err) {
-    statusEl.textContent = "Unable to reach intelligence server";
+    console.error("VAANI FRONTEND ERROR:", err);
+
+    caseFile.style.display = "block";
+    if (governanceBar) {
+      governanceBar.className = "governance-bar denied";
+      governanceBar.textContent = "REQUEST FAILED · GOVERNANCE STATUS UNKNOWN";
+    }
+    explanationEl.textContent = "Unable to render intelligence result";
+    if (evidencePanel) evidencePanel.innerHTML = "";
+
+    cardsContainer.innerHTML = `
+      <div class="empty-state">
+        ${err.message || "Unknown error"}
+      </div>
+    `;
+
+    statusEl.textContent = "Query failed";
   }
 }
 
@@ -498,101 +1210,1160 @@ function badgeClass(status) {
   return "";
 }
 
-function renderResult(data) {
-  caseFile.style.display = "block";
-  caseFile.style.animation = "none";
-  void caseFile.offsetWidth;
-  caseFile.style.animation = "";
 
-  explanationEl.textContent = data.explanation;
-  sqlBox.textContent = data.generated_sql;
-  countLabel.textContent = `${data.result_count} RECORD${data.result_count === 1 ? "" : "S"}`;
+function renderHotspotMap(records) {
 
-  if (!data.results || data.results.length === 0) {
-    cardsContainer.innerHTML = `<div class="empty-state">— NO MATCHING RECORDS —</div>`;
+  const mapEl = document.getElementById("hotspotMap");
+
+  if (!mapEl) return;
+
+  // Graceful fallback if map library or tiles are unavailable.
+  if (typeof L === "undefined") {
+    mapEl.innerHTML = `
+      <div class="hotspot-fallback">
+        ${records.map(row => `
+          <div class="fallback-row">
+            <span>${Number(row.Latitude).toFixed(2)}, ${Number(row.Longitude).toFixed(2)}</span>
+            <strong>${row.CaseCount || 0}</strong>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    return;
+  }
+
+  hotspotMap = L.map(mapEl, {
+    zoomControl: true,
+    scrollWheelZoom: false
+  });
+
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }
+  ).addTo(hotspotMap);
+
+  const points = [];
+  const maxCount = Math.max(
+    ...records.map(row => Number(row.CaseCount) || 0),
+    1
+  );
+
+  records.forEach((row, index) => {
+
+    const lat = Number(row.Latitude);
+    const lon = Number(row.Longitude);
+    const count = Number(row.CaseCount) || 0;
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return;
+    }
+
+    points.push([lat, lon]);
+
+    const radius = 7 + (count / maxCount) * 13;
+
+    const marker = L.circleMarker(
+      [lat, lon],
+      {
+        radius,
+        color: "#c9a24b",
+        weight: 1.5,
+        fillColor: "#c9a24b",
+        fillOpacity: 0.72
+      }
+    ).addTo(hotspotMap);
+
+    const firs = Array.isArray(row.FIRs)
+      ? row.FIRs
+      : [];
+
+    const stations = Array.isArray(row.Stations)
+      ? row.Stations
+      : [];
+
+    const firList = firs.length
+      ? `<ul class="hotspot-popup-list">${firs.map(fir => `<li>${fir}</li>`).join("")}</ul>`
+      : "<div>FIR details unavailable</div>";
+
+    const stationText = stations.length
+      ? stations.join(", ")
+      : "Station unavailable";
+
+    marker.bindPopup(`
+      <div class="hotspot-popup-title">
+        Hotspot Cell #${index + 1}
+      </div>
+      <div>
+        ${lat.toFixed(2)}, ${lon.toFixed(2)}
+      </div>
+      <div class="hotspot-popup-count">
+        <strong>${count}</strong> FIR${count === 1 ? "" : "s"}
+      </div>
+      <div>
+        <strong>Station:</strong> ${stationText}
+      </div>
+      <div style="margin-top:6px"><strong>Cases:</strong></div>
+      ${firList}
+    `);
+  });
+
+  if (points.length === 1) {
+    hotspotMap.setView(points[0], 11);
+  } else if (points.length > 1) {
+    hotspotMap.fitBounds(points, {
+      padding: [30, 30]
+    });
+  } else {
+    hotspotMap.setView([15.3173, 75.7139], 6);
+  }
+
+  setTimeout(() => {
+    hotspotMap.invalidateSize();
+  }, 50);
+}
+
+function renderConversationContext(data) {
+  if (!conversationContext) return;
+  const ctx = data.conversation_context || {};
+  const chips = [];
+  if (ctx.active_person) chips.push(`<span class="context-chip"><strong>PERSON</strong>${ctx.active_person}</span>`);
+  if (ctx.active_fir) chips.push(`<span class="context-chip"><strong>FIR</strong>${ctx.active_fir}</span>`);
+  if (Array.isArray(ctx.active_case_ids) && ctx.active_case_ids.length) chips.push(`<span class="context-chip"><strong>CASES</strong>${ctx.active_case_ids.length}</span>`);
+  if (ctx.last_intent) chips.push(`<span class="context-chip"><strong>CONTEXT</strong>${String(ctx.last_intent).replace(/_/g, ' ')}</span>`);
+  conversationContext.innerHTML = chips.length
+    ? `<span class="context-label">ACTIVE CONTEXT</span>${chips.join("")}`
+    : "";
+}
+
+function renderQueryMeta(data) {
+  if (!queryMeta || !sqlBoxWrap) return;
+  const qt = data.query_type || "unknown";
+  const engine = (data.filter_mode === "deterministic" || ["case_search","criminal_network","case_investigation","analytics","cross_intelligence"].includes(qt)) ? "DETERMINISTIC" : (qt.startsWith("gemini") ? "GEMINI FALLBACK" : "APPLICATION");
+  const canonical = data.canonical_request || {};
+  const intent = canonical.intent_label || data.analytics?.title || (qt === "criminal_network" ? "Relationship analysis" : qt === "case_investigation" ? "Case investigation" : qt === "case_search" ? "FIR search" : qt === "cross_intelligence" ? "Cross-dimension intelligence" : "Crime intelligence");
+  const count = Number(data.result_count || 0);
+  const introText = canonical.intent_label
+    ? `Vaani interpreted this as ${canonical.intent_label.toLowerCase()} and selected the evidence path automatically.`
+    : `Vaani selected the available intelligence path for this request.`;
+  queryMeta.innerHTML = `
+    <div class="workspace-intro" style="grid-column:1/-1"><div class="workspace-intro-kicker">INVESTIGATOR BRIEF</div><div class="workspace-intro-text">${introText}</div></div>
+    <div class="query-meta-card"><div class="query-meta-label">INTELLIGENCE MODE</div><div class="query-meta-value accent">${intent}</div></div>
+    <div class="query-meta-card"><div class="query-meta-label">EVIDENCE RESULT</div><div class="query-meta-value">${count} record${count === 1 ? "" : "s"}</div></div>
+    <div class="query-meta-card"><div class="query-meta-label">ENGINE</div><div class="query-meta-value">${engine}</div></div>`;
+
+  const sql = data.generated_sql || "";
+  sqlBoxWrap.innerHTML = sql ? `<details class="sql-collapsible"><summary>VIEW EXECUTED QUERY</summary><pre>${sql}</pre></details>` : "";
+}
+
+function renderCrossHotspotMap(records) {
+  const mapEl = document.getElementById("crossHotspotMap");
+  if (!mapEl) return;
+
+  if (typeof L === "undefined") {
+    mapEl.innerHTML = `
+      <div class="hotspot-fallback">
+        ${records.map(row => `
+          <div class="fallback-row">
+            <span>${Number(row.Latitude).toFixed(2)}, ${Number(row.Longitude).toFixed(2)} · ${row.AccusedName || "Unknown accused"}</span>
+            <strong>${row.CaseCount || 0}</strong>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    return;
+  }
+
+  hotspotMap = L.map(mapEl, { zoomControl: true, scrollWheelZoom: false });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(hotspotMap);
+
+  const points = [];
+  const maxCount = Math.max(...records.map(r => Number(r.CaseCount) || 0), 1);
+
+  records.forEach((row, index) => {
+    const lat = Number(row.Latitude);
+    const lon = Number(row.Longitude);
+    const count = Number(row.CaseCount) || 0;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+    points.push([lat, lon]);
+    const radius = 9 + (count / maxCount) * 10;
+    const marker = L.circleMarker([lat, lon], {
+      radius,
+      color: "#c9a24b",
+      weight: 2,
+      fillColor: "#c9a24b",
+      fillOpacity: 0.78
+    }).addTo(hotspotMap);
+
+    const firs = Array.isArray(row.FIRs) ? row.FIRs : [];
+    const stations = Array.isArray(row.Stations) ? row.Stations : [];
+    const crimes = Array.isArray(row.CrimeTypes) ? row.CrimeTypes : [];
+
+    marker.bindPopup(`
+      <div class="hotspot-popup-title">Repeat-Accused Overlap #${index + 1}</div>
+      <div><strong>${row.AccusedName || "Unknown accused"}</strong></div>
+      <div>${lat.toFixed(2)}, ${lon.toFixed(2)}</div>
+      <div class="hotspot-popup-count"><strong>${count}</strong> FIRs in cell</div>
+      <div><strong>Stations:</strong> ${stations.join(", ") || "Unavailable"}</div>
+      <div><strong>Crime types:</strong> ${crimes.join(", ") || "Unavailable"}</div>
+      <div style="margin-top:6px"><strong>Cases:</strong></div>
+      ${firs.length ? `<ul class="hotspot-popup-list">${firs.map(f => `<li>${f}</li>`).join("")}</ul>` : "<div>Unavailable</div>"}
+    `);
+  });
+
+  if (points.length === 1) hotspotMap.setView(points[0], 12);
+  else if (points.length > 1) hotspotMap.fitBounds(points, { padding: [30, 30] });
+  else hotspotMap.setView([15.3173, 75.7139], 6);
+
+  setTimeout(() => hotspotMap.invalidateSize(), 50);
+}
+
+// PDF EXPORT — intentionally isolated from rendering/UI logic
+const savePdfBtn = document.getElementById("savePdfBtn");
+if (savePdfBtn) {
+  savePdfBtn.addEventListener("click", () => {
+    try {
+      const jspdfApi = window.jspdf;
+      if (!jspdfApi || !jspdfApi.jsPDF) {
+        statusEl.textContent = "PDF export unavailable — library not loaded";
+        return;
+      }
+
+      const doc = new jspdfApi.jsPDF({ unit: "pt", format: "a4" });
+      const margin = 42;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const maxWidth = pageWidth - margin * 2;
+      let y = margin;
+
+      const addText = (text, size=10, bold=false, gap=8) => {
+        doc.setFont("helvetica", bold ? "bold" : "normal");
+        doc.setFontSize(size);
+        const lines = doc.splitTextToSize(String(text || ""), maxWidth);
+        const lineHeight = size * 1.35;
+        for (const line of lines) {
+          if (y + lineHeight > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
+          }
+          doc.text(line, margin, y);
+          y += lineHeight;
+        }
+        y += gap;
+      };
+
+      addText("KSP — VAANI", 18, true, 4);
+      addText("Crime Intelligence Console · Investigation Conversation", 10, false, 14);
+
+      const ctx = clientConversationContext || {};
+      const contextParts = [];
+      if (ctx.active_person) contextParts.push(`PERSON: ${ctx.active_person}`);
+      if (ctx.active_fir) contextParts.push(`FIR: ${ctx.active_fir}`);
+      if (Array.isArray(ctx.active_case_ids) && ctx.active_case_ids.length) contextParts.push(`CASES: ${ctx.active_case_ids.length}`);
+      if (contextParts.length) addText("ACTIVE CONTEXT · " + contextParts.join(" · "), 9, true, 12);
+
+      const visibleText = caseFile ? caseFile.innerText : "";
+      addText(visibleText, 9, false, 4);
+      addText("CATALYST AUTHENTICATION · ROLE-BASED ACCESS · AUDIT TRACE", 8, true, 0);
+
+      doc.save(`Vaani_Investigation_${ctx.active_fir || "Conversation"}.pdf`);
+      statusEl.textContent = "PDF saved";
+    } catch (err) {
+      console.error("VAANI PDF EXPORT ERROR:", err);
+      statusEl.textContent = "PDF export failed — try again";
+    }
+  });
+}
+
+function renderExplainability(data) {
+  if (!evidencePanel) return;
+
+  const info = data.explainability || {};
+  const sources = Array.isArray(info.source_tables)
+    ? info.source_tables
+    : [];
+  const limitations = Array.isArray(info.limitations)
+    ? info.limitations
+    : [];
+
+  const sourceHtml = sources.length
+    ? sources.map(source => `<span class="evidence-chip">${source}</span>`).join("")
+    : `<span class="evidence-value">Not available</span>`;
+
+  const limitationsHtml = limitations.length
+    ? limitations.map(item => `<div class="evidence-item"><div class="evidence-value">${item}</div></div>`).join("")
+    : `<div class="evidence-value">No additional limitations reported.</div>`;
+
+  const recordCount = Number.isFinite(Number(info.records_considered))
+    ? Number(info.records_considered)
+    : (data.result_count || 0);
+
+  evidencePanel.innerHTML = `
+    <details class="evidence-panel">
+      <summary>Evidence &amp; Method</summary>
+      <div class="evidence-body">
+        <div class="evidence-item">
+          <div class="evidence-label">DATA SOURCES</div>
+          <div class="evidence-value">${sourceHtml}</div>
+        </div>
+
+        <div class="evidence-item">
+          <div class="evidence-label">EVIDENCE BASIS</div>
+          <div class="evidence-value">
+            ${info.evidence_basis || "Evidence basis not available."}
+          </div>
+        </div>
+
+        <div class="evidence-item">
+          <div class="evidence-label">METHOD</div>
+          <div class="evidence-value">
+            ${info.method || "Method not available."}
+          </div>
+        </div>
+
+        <div class="evidence-item">
+          <div class="evidence-label">${info.records_label || "RECORDS CONSIDERED"}</div>
+          <div class="evidence-value">${recordCount}</div>
+        </div>
+
+        <div class="evidence-item">
+          <div class="evidence-label">LIMITATIONS</div>
+          ${limitationsHtml}
+        </div>
+      </div>
+    </details>
+  `;
+}
+
+
+function renderResults(data) {
+
+
+  // ==========================================
+  // CASE INTELLIGENCE
+  // ==========================================
+  if (data.query_type === "case_investigation") {
+    const c = data.case || (Array.isArray(data.results) ? data.results[0] : null);
+    const intel = data.intelligence || {};
+    const signals = intel.signals || {};
+
+    if (!c) {
+      cardsContainer.innerHTML = `<div class="empty-state">— CASE NOT FOUND —</div>`;
+      return;
+    }
+
+    const accused = Array.isArray(intel.accused) ? intel.accused : [];
+    const victims = Array.isArray(intel.victims) ? intel.victims : [];
+    const complainants = Array.isArray(intel.complainants) ? intel.complainants : [];
+    const legal = Array.isArray(intel.legal) ? intel.legal : [];
+    const chargesheets = Array.isArray(intel.chargesheets) ? intel.chargesheets : [];
+    const arrests = Array.isArray(intel.arrests) ? intel.arrests : [];
+    const relatedCases = Array.isArray(intel.related_cases) ? intel.related_cases : [];
+    const relatedPeople = Array.isArray(intel.related_people) ? intel.related_people : [];
+    const relationshipEvidence = Array.isArray(intel.relationship_evidence) ? intel.relationship_evidence : [];
+
+    const peopleBlock = accused.length
+      ? accused.map(x => `<div class="intel-row"><strong>${x.AccusedName || "Unknown"}</strong>${x.AgeYear ? ` · Age ${x.AgeYear}` : ""}</div>`).join("")
+      : `<div class="empty-state">No accused record available.</div>`;
+
+    const victimsBlock = victims.length
+      ? victims.map(x => `<div class="intel-row"><strong>${x.VictimName || "Unknown"}</strong>${x.AgeYear ? ` · Age ${x.AgeYear}` : ""}</div>`).join("")
+      : `<div class="empty-state">No victim record available.</div>`;
+
+    const complainantBlock = complainants.length
+      ? complainants.map(x => `<div class="intel-row"><strong>${x.ComplainantName || "Unknown"}</strong>${x.AgeYear ? ` · Age ${x.AgeYear}` : ""}</div>`).join("")
+      : `<div class="empty-state">No complainant record available.</div>`;
+
+    const legalBlock = legal.length
+      ? legal.map(x => `<div class="intel-row"><strong>${x.ActShortName || x.ActName || "Act"}</strong>${x.SectionName ? ` · ${x.SectionName}` : ""}</div>`).join("")
+      : `<div class="empty-state">No Act/Section record available.</div>`;
+
+    const relatedBlock = relatedCases.length
+      ? relatedCases.map(x => `<div class="intel-row"><strong>${x.FIR || "Case"}</strong>${x.CrimeNo ? ` · ${x.CrimeNo}` : ""}${x.Date ? ` · ${x.Date}` : ""}<div class="meta">${x.BriefFacts || ""}</div></div>`).join("")
+      : `<div class="empty-state">No related case found through shared accused identity.</div>`;
+
+    const relationshipBlock = relationshipEvidence.length
+      ? relationshipEvidence.map(x => `
+          <div class="relationship-card">
+            <div class="relationship-person">${x.PersonName || "Unknown"}</div>
+            <div class="relationship-reason">${x.Relationship}</div>
+            <div class="relationship-strength">${x.SharedCaseCount} shared case${x.SharedCaseCount === 1 ? "" : "s"}</div>
+            <div class="relationship-cases">
+              ${(x.SharedCases || []).map(c => `<span class="network-chip">${c.FIR || "Case"}</span>`).join("")}
+            </div>
+          </div>
+        `).join("")
+      : `<div class="empty-state">No cross-case relationship evidence found.</div>`;
+
+    const statusSignals = [
+      `${signals.accused_count || 0} accused`,
+      `${signals.victim_count || 0} victims`,
+      `${signals.complainant_count || 0} complainant record${signals.complainant_count === 1 ? "" : "s"}`,
+      `${signals.legal_section_count || 0} legal link${signals.legal_section_count === 1 ? "" : "s"}`,
+      `${signals.related_case_count || 0} related case${signals.related_case_count === 1 ? "" : "s"}`,
+      signals.chargesheeted ? "Chargesheet recorded" : "No chargesheet record",
+      signals.arrest_or_surrender_recorded ? "Arrest/surrender recorded" : "No arrest/surrender record"
+    ].map(x => `<span class="signal">${x}</span>`).join("");
+
+    cardsContainer.innerHTML = `
+      <div class="case-intel-header">
+        <div class="case-intel-title">CASE INTELLIGENCE</div>
+        <div class="fir" style="margin-top:8px">${c.CaseNO || c.CaseMasterID || "Case"}</div>
+        <div class="name">${c.CrimeNo || ""}</div>
+        <div class="intel-note" style="margin-top:8px">${data.explanation || ""}</div>
+      </div>
+
+      <div class="intel-grid">
+        <div class="intel-box"><div class="intel-label">Crime Type</div><div class="intel-value">${c.CrimeType || c.CrimeGroup || "—"}</div></div>
+        <div class="intel-box"><div class="intel-label">Station</div><div class="intel-value">${c.StationName || "—"}</div></div>
+        <div class="intel-box"><div class="intel-label">Status</div><div class="intel-value">${c.Status || "—"}</div></div>
+        <div class="intel-box"><div class="intel-label">Gravity</div><div class="intel-value">${c.Gravity || "—"}</div></div>
+        <div class="intel-box"><div class="intel-label">Registered</div><div class="intel-value">${c.CrimeRegisteredDate || "—"}</div></div>
+        <div class="intel-box"><div class="intel-label">Court</div><div class="intel-value">${c.CourtName || "—"}</div></div>
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">INTELLIGENCE SIGNALS</div>
+        <div>${statusSignals}</div>
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">BRIEF FACTS</div>
+        <div class="intel-note">${c.BriefFacts || "No brief facts recorded."}</div>
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">ACCUSED</div>
+        ${peopleBlock}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">VICTIMS</div>
+        ${victimsBlock}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">COMPLAINANTS</div>
+        ${complainantBlock}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">LEGAL ACTS / SECTIONS</div>
+        ${legalBlock}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">RELATIONSHIP EVIDENCE</div>
+        ${relationshipBlock}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">RELATED CASES</div>
+        ${relatedBlock}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">INVESTIGATION TIMELINE</div>
+        ${Array.isArray(intel.investigation_timeline) && intel.investigation_timeline.length
+          ? intel.investigation_timeline.map(event => `
+              <div class="intel-row"><strong>${event.label || "Event"}</strong> · ${event.date || "—"}</div>
+            `).join("")
+          : `<div class="empty-state">No dated investigation events available.</div>`}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">SIMILAR PAST CASES</div>
+        ${Array.isArray(intel.similar_cases) && intel.similar_cases.length
+          ? intel.similar_cases.map(item => `
+              <div class="intel-row">
+                <strong>${item.FIR || "Case"}</strong> · Similarity ${item.SimilarityScore || 0}
+                <div class="meta">${(item.MatchBasis || []).join(" · ")}${item.Date ? ` · ${item.Date}` : ""}</div>
+                <div class="meta">${item.BriefFacts || ""}</div>
+              </div>
+            `).join("")
+          : `<div class="empty-state">No similar past cases identified from available fields.</div>`}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">INVESTIGATIVE LEADS</div>
+        ${Array.isArray(intel.investigative_leads) && intel.investigative_leads.length
+          ? intel.investigative_leads.map(lead => `
+              <div class="intel-row">
+                <strong>${lead.priority || "Lead"}</strong> · ${lead.lead || ""}
+                <div class="meta">Evidence: ${lead.basis || "Available case evidence"}</div>
+              </div>
+            `).join("")
+          : `<div class="empty-state">No additional leads generated from available evidence.</div>`}
+      </div>
+
+      <div class="intel-section">
+        <div class="intel-section-title">PROCESS RECORDS</div>
+        <div class="intel-row">Chargesheet records: ${chargesheets.length}</div>
+        <div class="intel-row">Arrest / surrender records: ${arrests.length}</div>
+      </div>
+    `;
+    return;
+  }
+
+  // ==========================================
+  // NETWORK RESULTS
+  // ==========================================
+  if (data.query_type === "criminal_network") {
+
+    const network = data.network || {};
+    const targetNetwork = network.target_network || null;
+    const target = targetNetwork ? targetNetwork.target : null;
+    const connections = targetNetwork && Array.isArray(targetNetwork.connections)
+      ? targetNetwork.connections
+      : [];
+
+    // ------------------------------------------
+    // Specific person network
+    // ------------------------------------------
+    if (target) {
+
+      const targetCases = Array.isArray(target.Cases)
+        ? target.Cases
+        : [];
+
+      const graphWidth = 700;
+      const graphHeight = 360;
+      const centerX = 350;
+      const centerY = 180;
+
+      const people = connections;
+
+      const casePositions = {};
+      targetCases.forEach((caseItem, index) => {
+        const y = targetCases.length === 1
+          ? centerY
+          : 55 + index * ((graphHeight - 110) / Math.max(1, targetCases.length - 1));
+        casePositions[String(caseItem.CaseMasterID)] = {
+          x: 120,
+          y: y,
+          label: caseItem.FIR || `Case ${caseItem.CaseMasterID}`
+        };
+      });
+
+      const personPositions = {};
+      people.forEach((person, index) => {
+        const y = people.length === 1
+          ? centerY
+          : 95 + index * ((graphHeight - 190) / Math.max(1, people.length - 1));
+        personPositions[person.AccusedName] = {
+          x: 590,
+          y: y,
+          label: person.AccusedName || "Unknown"
+        };
+      });
+
+      const edgeParts = [];
+
+      // Target person -> every involved case
+      targetCases.forEach(caseItem => {
+        const pos = casePositions[String(caseItem.CaseMasterID)];
+        if (!pos) return;
+
+        edgeParts.push(`
+          <line
+            class="graph-edge"
+            x1="${centerX}"
+            y1="${centerY}"
+            x2="${pos.x}"
+            y2="${pos.y}"
+          ></line>
+        `);
+      });
+
+      // Shared case -> connected person
+      people.forEach(person => {
+        const personPos = personPositions[person.AccusedName];
+        if (!personPos) return;
+
+        const sharedCases = Array.isArray(person.SharedCases)
+          ? person.SharedCases
+          : [];
+
+        sharedCases.forEach(sharedCase => {
+          const casePos = casePositions[String(sharedCase.CaseMasterID)];
+          if (!casePos) return;
+
+          edgeParts.push(`
+            <line
+              class="graph-edge"
+              x1="${casePos.x}"
+              y1="${casePos.y}"
+              x2="${personPos.x}"
+              y2="${personPos.y}"
+            ></line>
+          `);
+        });
+      });
+
+      const caseParts = targetCases.map(caseItem => {
+        const pos = casePositions[String(caseItem.CaseMasterID)];
+        return `
+          <rect
+            class="graph-case"
+            x="${pos.x - 48}"
+            y="${pos.y - 18}"
+            width="96"
+            height="36"
+            rx="6"
+          ></rect>
+          <text
+            class="graph-label graph-case-label"
+            x="${pos.x}"
+            y="${pos.y + 4}"
+          >${pos.label}</text>
+        `;
+      }).join("");
+
+      const personParts = people.map(person => {
+        const pos = personPositions[person.AccusedName];
+        return `
+          <circle
+            class="graph-person"
+            cx="${pos.x}"
+            cy="${pos.y}"
+            r="20"
+          ></circle>
+          <text
+            class="graph-label"
+            x="${pos.x}"
+            y="${pos.y + 38}"
+          >${pos.label}</text>
+        `;
+      }).join("");
+
+      const targetPart = `
+        <circle
+          class="graph-person graph-target"
+          cx="${centerX}"
+          cy="${centerY}"
+          r="28"
+        ></circle>
+        <text
+          class="graph-label"
+          x="${centerX}"
+          y="${centerY + 48}"
+        >${target.AccusedName || "Unknown"}</text>
+      `;
+
+      const caseList = targetCases.map(caseItem => `
+        <div class="network-case">
+          <div class="fir">${caseItem.FIR || ""}</div>
+          <div class="meta">
+            ${caseItem.CrimeNo || ""}
+            ${caseItem.Date ? " · " + caseItem.Date : ""}
+          </div>
+        </div>
+      `).join("");
+
+      const connectionList = connections.length
+        ? connections.map(person => {
+            const sharedCases = Array.isArray(person.SharedCases)
+              ? person.SharedCases
+              : [];
+
+            return `
+              <div class="record-card network-person">
+                <div class="fir">
+                  ${person.AccusedName || "Unknown"}
+                </div>
+                <div class="meta">
+                  ${person.ConnectionStrength || 0}
+                  shared case${person.ConnectionStrength === 1 ? "" : "s"}
+                </div>
+                <div class="facts">
+                  ${sharedCases.map(caseItem => `
+                    <span class="network-chip">
+                      ${caseItem.FIR || ""}
+                    </span>
+                  `).join("")}
+                </div>
+              </div>
+            `;
+          }).join("")
+        : `<div class="empty-state">— NO CONNECTIONS FOUND —</div>`;
+
+      cardsContainer.innerHTML = `
+        <div class="network-header">
+          <div class="fir">
+            ${target.AccusedName || "Unknown"}
+          </div>
+          <div class="network-stats">
+            ${target.CaseCount || 0} cases ·
+            ${connections.length} connected people
+          </div>
+        </div>
+
+        <div class="network-graph">
+          <svg
+            viewBox="0 0 ${graphWidth} ${graphHeight}"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            ${edgeParts.join("")}
+            ${caseParts}
+            ${targetPart}
+            ${personParts}
+          </svg>
+        </div>
+
+        <div class="network-title">
+          CASES INVOLVING ${(target.AccusedName || "").toUpperCase()}
+        </div>
+
+        <div class="network-cases">
+          ${caseList}
+        </div>
+
+        <div class="network-title">
+          CONNECTED PEOPLE
+        </div>
+
+        ${connectionList}
+      `;
+
+      return;
+    }
+
+    // ------------------------------------------
+    // Repeated accused list
+    // ------------------------------------------
+    if (!Array.isArray(data.results) || data.results.length === 0) {
+      cardsContainer.innerHTML =
+        `<div class="empty-state">— NO REPEATED ACCUSED FOUND —</div>`;
+      return;
+    }
+
+    cardsContainer.innerHTML = data.results.map(row => `
+      <div class="record-card">
+        <div class="fir">
+          ${row.AccusedName || "Unknown"}
+        </div>
+        <div class="meta">
+          ${row.CaseCount || 0} cases
+        </div>
+        <div class="facts">
+          ${(Array.isArray(row.Cases) ? row.Cases : []).map(caseItem => `
+            <span class="network-chip">
+              ${caseItem.FIR || ""}
+            </span>
+          `).join("")}
+        </div>
+      </div>
+    `).join("");
+
+    return;
+  }
+
+
+  // ==========================================
+  // CROSS-DIMENSION INTELLIGENCE
+  // ==========================================
+  if (data.query_type === "cross_intelligence") {
+    const analytics = data.analytics || data;
+    const records = Array.isArray(analytics.records) ? analytics.records : [];
+    if (!records.length) {
+      cardsContainer.innerHTML = `<div class="empty-state">— NO REPEAT-ACCUSED HOTSPOT OVERLAPS —</div>`;
+      return;
+    }
+
+    if (hotspotMap) {
+      try { hotspotMap.remove(); } catch (_) {}
+      hotspotMap = null;
+    }
+
+    cardsContainer.innerHTML = `
+      <div class="investigator-banner"><strong>CROSS-DIMENSION INTELLIGENCE</strong><div style="margin-top:5px;color:var(--paper-dim);font-size:12px;line-height:1.45">Repeated accused identities that recur inside the same spatial cell. This is an evidence linkage, not a culpability finding.</div></div>
+
+      <div class="hotspot-map-wrap" style="margin-bottom:16px">
+        <div id="crossHotspotMap" class="hotspot-map"></div>
+        <div class="hotspot-legend">
+          <span><strong>Highlighted cells</strong> = repeat-accused overlap</span>
+          <span>Cell size: ${analytics.grid_size_degrees || 0.01}°</span>
+        </div>
+      </div>
+
+      ${records.map(r => `
+        <div class="cross-card">
+          <div class="cross-card-top"><div class="cross-person">${r.AccusedName || "Unknown accused"}</div><div class="cross-location">${Number(r.Latitude).toFixed(2)}, ${Number(r.Longitude).toFixed(2)}</div></div>
+          <div class="cross-grid">
+            <div class="cross-stat"><div class="cross-stat-label">FIRs in cell</div><div class="cross-stat-value">${r.CaseCount || 0}</div></div>
+            <div class="cross-stat"><div class="cross-stat-label">Stations</div><div class="cross-stat-value">${(r.Stations || []).length}</div></div>
+            <div class="cross-stat"><div class="cross-stat-label">Crime types</div><div class="cross-stat-value">${(r.CrimeTypes || []).length}</div></div>
+          </div>
+          <div class="cross-cases">${(r.FIRs || []).map(f => `<span class="cross-chip">${f}</span>`).join("")}</div>
+        </div>`).join("")}
+      <div class="warning-method">${analytics.method || "Deterministic cross-dimension analysis."}</div>
+    `;
+
+    renderCrossHotspotMap(records);
+    return;
+  }
+
+  // ==========================================
+  // ANALYTICS RESULTS
+  // ==========================================
+  if (data.query_type === "analytics") {
+
+    const analytics = data.analytics || data;
+
+    // ------------------------------------------
+    // EARLY WARNING / PROACTIVE SIGNALS
+    // ------------------------------------------
+    if (analytics.query_type === "early_warning" || analytics.chart_type === "signals") {
+
+      const signals = Array.isArray(analytics.signals)
+        ? analytics.signals
+        : (Array.isArray(analytics.records) ? analytics.records : []);
+
+      if (!signals.length) {
+        cardsContainer.innerHTML = `<div class="empty-state">— NO STRONG PROACTIVE SIGNALS —</div>`;
+        return;
+      }
+
+      const signalCards = signals.map(signal => {
+        const severity = (signal.severity || "MEDIUM").toLowerCase();
+        const cases = Array.isArray(signal.evidence_cases)
+          ? signal.evidence_cases
+          : (Array.isArray(signal.cases) ? signal.cases : []);
+
+        const subject = signal.dimension || "Investigative signal";
+
+        return `
+          <div class="warning-card ${severity}">
+            <div class="warning-top">
+              <span class="warning-severity ${severity}">${(signal.severity || "MEDIUM").toUpperCase()}</span>
+              <span class="warning-score">Priority ${signal.priority_score ?? "—"} · ${signal.signal_id || ""}</span>
+            </div>
+
+            <div class="warning-title">${signal.title || "Proactive crime signal"}</div>
+            <div class="warning-subject">${subject}</div>
+
+            <div class="warning-evidence">
+              ${signal.evidence_summary || signal.evidence || "Evidence available in linked records."}
+            </div>
+
+            ${cases.length ? `
+              <div class="warning-cases">
+                ${cases.map(fir => `<span class="warning-case-chip">${fir}</span>`).join("")}
+              </div>
+            ` : ""}
+
+            <div class="warning-lead">
+              <strong>INVESTIGATIVE LEAD</strong><br>
+              ${signal.recommended_lead || "Review the supporting records for this signal."}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      cardsContainer.innerHTML = `
+        <div class="early-warning-summary">
+          <div class="analytics-title">${analytics.title || "Proactive Crime Signals"}</div>
+          <div class="analytics-total">${analytics.total || 0} FIRs analyzed · ${signals.length} signals</div>
+          <div class="warning-headline">${analytics.headline || "Evidence-backed signals identified from the available FIR records."}</div>
+          ${signalCards}
+          <div class="warning-method">${analytics.method || "Deterministic evidence fusion over available KSP records."}</div>
+        </div>
+      `;
+
+      return;
+    }
+
+    const chartType = analytics.chart_type || "bar";
+    const labels = Array.isArray(analytics.labels)
+      ? analytics.labels
+      : [];
+    const values = Array.isArray(analytics.values)
+      ? analytics.values
+      : [];
+
+    if (!labels.length || !values.length) {
+      cardsContainer.innerHTML =
+        `<div class="empty-state">— NO ANALYTICS DATA —</div>`;
+      return;
+    }
+
+    // ------------------------------------------
+    // SOCIOLOGICAL GROUPED BAR
+    // ------------------------------------------
+    if (chartType === "grouped_bar") {
+      const series = Array.isArray(analytics.series) ? analytics.series : [];
+
+      if (!series.length || !labels.length) {
+        cardsContainer.innerHTML = `<div class="empty-state">— NO CROSS-ANALYSIS DATA —</div>`;
+        return;
+      }
+
+      const maxValue = Math.max(
+        ...series.flatMap(item => Array.isArray(item.values) ? item.values : [])
+          .map(value => Number(value) || 0),
+        1
+      );
+
+      const groupBlocks = labels.map((label, labelIndex) => {
+        const rows = series.map(item => {
+          const value = Number((item.values || [])[labelIndex]) || 0;
+          if (!value) return "";
+          const width = (value / maxValue) * 100;
+          return `
+            <div class="grouped-bar-row">
+              <div class="grouped-bar-label">${item.name || "Unknown"}</div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:${width}%" aria-label="${item.name || "Unknown"}: ${value}"></div>
+              </div>
+              <div class="bar-value">${value}</div>
+            </div>
+          `;
+        }).join("");
+
+        return `
+          <div class="grouped-bar-group">
+            <div class="grouped-bar-title">${label}</div>
+            ${rows || `<div class="empty-state">No linked crime-type records.</div>`}
+          </div>
+        `;
+      }).join("");
+
+      const tableRows = Array.isArray(analytics.records)
+        ? analytics.records.map(row => `
+            <div class="analytics-row">
+              <span>${row.AgeGroup || "Unknown"} · ${row.CrimeType || "Unknown"}</span>
+              <span class="analytics-row-count">${row.AccusedCount || 0}</span>
+            </div>
+          `).join("")
+        : "";
+
+      cardsContainer.innerHTML = `
+        <div class="analytics-summary">
+          <div class="analytics-title">${analytics.title || "Age Group × Crime Type"}</div>
+          <div class="analytics-total">${analytics.total || 0} ${analytics.unit_label || "records"} analyzed</div>
+          <div class="grouped-bar-chart">${groupBlocks}</div>
+          <div class="analytics-table">
+            <div class="network-title">BREAKDOWN</div>
+            ${tableRows}
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // ------------------------------------------
+    // SPATIAL HOTSPOT MAP
+    // ------------------------------------------
+    if (chartType === "map") {
+
+      const records = Array.isArray(analytics.records)
+        ? analytics.records
+        : [];
+
+      if (!records.length) {
+        cardsContainer.innerHTML =
+          `<div class="empty-state">— NO HOTSPOT DATA —</div>`;
+        return;
+      }
+
+      if (hotspotMap) {
+        try {
+          hotspotMap.remove();
+        } catch (_) {}
+        hotspotMap = null;
+      }
+
+      cardsContainer.innerHTML = `
+        <div class="analytics-summary">
+
+          <div class="analytics-title">
+            ${analytics.title || "Crime Hotspots"}
+          </div>
+
+          <div class="analytics-total">
+            ${analytics.total || 0} FIRs analyzed · ${records.length} spatial cells
+          </div>
+
+          <div class="hotspot-map-wrap">
+            <div id="hotspotMap" class="hotspot-map"></div>
+            <div class="hotspot-legend">
+              <span><strong>Higher count</strong> = larger marker</span>
+              <span>Cell size: ${analytics.grid_size_degrees || 0.01}°</span>
+            </div>
+          </div>
+
+          <div class="analytics-table">
+            <div class="network-title">HOTSPOT BREAKDOWN</div>
+            ${records.map(row => `
+              <div class="analytics-row">
+                <span>${Number(row.Latitude).toFixed(2)}, ${Number(row.Longitude).toFixed(2)}</span>
+                <span class="analytics-row-count">${row.CaseCount || 0}</span>
+              </div>
+            `).join("")}
+          </div>
+
+        </div>
+      `;
+
+      renderHotspotMap(records);
+      return;
+    }
+
+    // ------------------------------------------
+    // STANDARD ANALYTICS CHARTS
+    // ------------------------------------------
+    const maxValue = Math.max(
+      ...values.map(value => Number(value) || 0),
+      1
+    );
+
+    const chartRows = labels.map((label, index) => {
+
+      const value = Number(values[index]) || 0;
+      const width = (value / maxValue) * 100;
+
+      return `
+        <div class="bar-row">
+
+          <div class="bar-label">
+            ${label || "Unknown"}
+          </div>
+
+          <div class="bar-track">
+            <div
+              class="bar-fill"
+              style="width:${width}%"
+              aria-label="${label || "Unknown"}: ${value}"
+            ></div>
+          </div>
+
+          <div class="bar-value">
+            ${value}
+          </div>
+
+        </div>
+      `;
+    }).join("");
+
+    const tableRows = labels.map((label, index) => {
+
+      const value = Number(values[index]) || 0;
+
+      return `
+        <div class="analytics-row">
+          <span>${label || "Unknown"}</span>
+          <span class="analytics-row-count">${value}</span>
+        </div>
+      `;
+    }).join("");
+
+    cardsContainer.innerHTML = `
+      <div class="analytics-summary">
+
+        <div class="analytics-title">
+          ${analytics.title || "Crime Analytics"}
+        </div>
+
+        <div class="analytics-total">
+          ${analytics.total || 0} ${analytics.unit_label || "records"} analyzed
+        </div>
+
+        <div class="bar-chart">
+          ${chartRows}
+        </div>
+
+        <div class="analytics-table">
+          <div class="network-title">
+            BREAKDOWN
+          </div>
+
+          ${tableRows}
+        </div>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  // ==========================================
+  // GEMINI FAILURE / TEMPORARY UNAVAILABLE
+  // ==========================================
+  if (data.query_type === "gemini_unavailable" || data.query_type === "gemini_error") {
+    const transient = data.query_type === "gemini_unavailable";
+    cardsContainer.innerHTML = `
+      <div class="intel-section">
+        <div class="intel-section-title">LANGUAGE ENGINE STATUS</div>
+        <div class="intel-row">
+          <div class="intel-note">
+            ${transient
+              ? "Gemini is temporarily unavailable. No database query was executed for this request."
+              : "Gemini could not translate this request. No database query was executed."}
+          </div>
+          <div class="intel-note" style="margin-top:8px;color:var(--paper-dim)">
+            FIR search, case investigation, criminal network analysis and deterministic analytics remain available.
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // ==========================================
+  // NORMAL FIR RESULTS
+  // ==========================================
+  if (!Array.isArray(data.results) || data.results.length === 0) {
+    cardsContainer.innerHTML =
+      `<div class="empty-state">— NO MATCHING RECORDS —</div>`;
     return;
   }
 
   if (data.results.length === 1 && "total" in data.results[0]) {
-    cardsContainer.innerHTML = `<div class="empty-state" style="font-size:28px; color:var(--brass);">${data.results[0].total}</div>`;
+    cardsContainer.innerHTML = `
+      <div class="empty-state" style="font-size:28px; color:var(--brass);">
+        ${data.results[0].total}
+      </div>
+    `;
     return;
   }
 
   cardsContainer.innerHTML = data.results.map(row => `
     <div class="record-card">
-      <div class="fir">${row.fir_number || ""}</div>
-      <div class="name">${row.complainant_name || ""}</div>
-      <div class="meta">${row.complaint_type || ""} · ${row.station || ""} · ${row.date_filed || ""}</div>
-      <div class="badge ${badgeClass(row.status)}">${row.status || ""}</div>
+      <div class="fir">
+        ${row.CaseNO || row.CaseMasterID || ""}
+      </div>
+
+      <div class="name">
+        ${row.CrimeNo || ""}
+      </div>
+
+      <div class="meta">
+        Registered: ${row.CrimeRegisteredDate || ""}
+      </div>
+
+      <div class="meta">
+        Station: ${row.StationName || "—"}
+      </div>
+
+      <div class="meta">
+        ${row.CrimeType || "—"}
+        · Status: ${row.Status || "—"}
+        · Gravity: ${row.Gravity || "—"}
+      </div>
+
+      <div class="facts">
+        ${row.BriefFacts || "No brief facts available."}
+      </div>
     </div>
   `).join("");
 }
-let conversationLog = [];
 
-function logToConversation(question, data) {
-  conversationLog.push({
-    question: question,
-    explanation: data.explanation,
-    sql: data.generated_sql,
-    resultCount: data.result_count,
-    results: data.results,
-    timestamp: new Date().toLocaleString()
-  });
-}
-
-document.getElementById("savePdfBtn").addEventListener("click", () => {
-  if (conversationLog.length === 0) {
-    alert("No queries yet to save.");
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 20;
-
-  doc.setFont("times", "bold");
-  doc.setFontSize(16);
-  doc.text("Vaani -- KSP Crime Intelligence Console", 15, y);
-  y += 7;
-  doc.setFontSize(10);
-  doc.setFont("times", "normal");
-  doc.text("Conversation Log -- Generated " + new Date().toLocaleString(), 15, y);
-  y += 10;
-
-  conversationLog.forEach((entry, idx) => {
-    if (y > 260) { doc.addPage(); y = 20; }
-
-    doc.setFont("times", "bold");
-    doc.setFontSize(12);
-    doc.text(`${idx + 1}. Query: ${entry.question}`, 15, y);
-    y += 6;
-
-    doc.setFont("times", "normal");
-    doc.setFontSize(10);
-    const explLines = doc.splitTextToSize(entry.explanation, 180);
-    doc.text(explLines, 15, y);
-    y += explLines.length * 5;
-
-    doc.setFont("courier", "normal");
-    doc.setFontSize(8);
-    doc.text(`SQL: ${entry.sql}`, 15, y);
-    y += 5;
-    doc.text(`Results: ${entry.resultCount} record(s)`, 15, y);
-    y += 5;
-
-    entry.results.slice(0, 5).forEach(row => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      const line = Object.entries(row).map(([k, v]) => `${k}: ${v}`).join("  |  ");
-      const rowLines = doc.splitTextToSize(line, 180);
-      doc.text(rowLines, 18, y);
-      y += rowLines.length * 4;
-    });
-
-    y += 6;
-  });
-
-  doc.save(`vaani-conversation-${Date.now()}.pdf`);
-});
 </script>
 
 </body>

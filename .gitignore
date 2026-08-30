@@ -1,0 +1,21 @@
+@"
+# Environment / secrets
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Catalyst build artifacts
+.build/
+
+# Logs
+*.log
+
+# Local database / generated data
+*.db
+
+# OS / editor
+.DS_Store
+.vscode/
