@@ -951,6 +951,101 @@
   .cross-cases { margin-top:9px; }
   .cross-chip { display:inline-block; margin:2px 5px 2px 0; padding:4px 7px; border:1px solid rgba(201,162,75,.18); border-radius:999px; font:10px 'Courier New',monospace; color:var(--paper-dim); }
   @media (max-width:560px) { .query-meta,.cross-grid{grid-template-columns:1fr;} }
+
+
+  /* Catalyst authentication gate — presentation only; existing console UI remains unchanged */
+  body.auth-checking .letterhead,
+  body.auth-checking .console,
+  body.auth-checking .governance-bar,
+  body.auth-checking footer { filter: blur(3px); pointer-events: none; user-select: none; }
+  #authGate {
+    position: fixed; inset: 0; z-index: 9999; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(7,10,14,.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--paper); text-align: center; padding: 24px;
+  }
+  #authGate .gate-card {
+    position: relative;
+    width: min(470px, 92vw);
+    padding: 34px 34px 30px;
+    border: 1px solid rgba(201,162,75,.46);
+    border-radius: 4px;
+    background:
+      linear-gradient(180deg, rgba(30,40,51,.98), rgba(19,27,35,.98));
+    box-shadow:
+      0 28px 90px rgba(0,0,0,.58),
+      inset 0 1px 0 rgba(255,255,255,.035);
+    overflow: hidden;
+  }
+  #authGate .gate-card::before,
+  #authGate .gate-card::after {
+    content: '';
+    position: absolute;
+    width: 44px; height: 44px;
+    border-color: rgba(201,162,75,.55);
+    pointer-events: none;
+  }
+  #authGate .gate-card::before {
+    top: 11px; left: 11px;
+    border-top: 1px solid; border-left: 1px solid;
+  }
+  #authGate .gate-card::after {
+    right: 11px; bottom: 11px;
+    border-right: 1px solid; border-bottom: 1px solid;
+  }
+  #authGate .gate-kicker {
+    font: 10px/1.4 'Courier New', monospace;
+    letter-spacing: .24em;
+    color: var(--brass);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  #authGate h2 {
+    margin: 0 0 12px;
+    font-family: Georgia, serif;
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: .01em;
+  }
+  #authGate p {
+    max-width: 390px;
+    margin: 0 auto 24px;
+    color: var(--paper-dim);
+    line-height: 1.65;
+    font-size: 13px;
+  }
+  #authGate button {
+    min-width: 150px;
+    border: 1px solid var(--brass);
+    background: linear-gradient(180deg, #d5ad58, #bc9540);
+    color: #12161b;
+    padding: 11px 22px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    box-shadow: 0 8px 22px rgba(0,0,0,.24);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  #authGate button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+    box-shadow: 0 10px 26px rgba(0,0,0,.30);
+  }
+  #authGate button:active { transform: translateY(0); }
+  #authGate .gate-secondary {
+    margin-top: 14px;
+    font-size: 10px;
+    line-height: 1.5;
+    color: rgba(226,231,236,.56);
+    font-family: 'Courier New', monospace;
+    letter-spacing: .04em;
+  }
 </style>
 </head>
 <body>
@@ -994,15 +1089,33 @@
   </div>
 </div>
 
+
+<div id="authGate" aria-modal="true" role="dialog" aria-labelledby="authGateTitle" style="position:fixed !important; inset:0 !important; z-index:99999 !important; display:none; align-items:center; justify-content:center; background:rgba(12,15,19,.94); backdrop-filter:blur(10px); color:var(--paper); text-align:center; padding:24px; box-sizing:border-box;">
+  <div class="gate-card" style="width:min(440px,92vw); padding:28px; border:1px solid rgba(201,162,75,.45); border-radius:12px; background:var(--ink-2); box-shadow:0 20px 70px rgba(0,0,0,.45); box-sizing:border-box;">
+    <div class="gate-kicker">CATALYST AUTHENTICATION</div>
+    <h2 id="authGateTitle">Sign in to Vaani</h2>
+    <p>This Vaani environment requires an authenticated investigator session before crime intelligence can be queried.</p>
+    <button type="button" id="authGateBtn">Sign in</button>
+    <div class="gate-secondary">New evaluator? Use Sign Up on the Catalyst hosted login page.</div>
+  </div>
+</div>
+
 <div id="governanceBar" class="governance-bar dev">LOCAL DEVELOPMENT · AUTH NOT ENFORCED · ADMIN DEV SCOPE · AUDIT PENDING</div>
 <div id="authNotice" class="auth-notice"></div>
 
 <footer>CATALYST AUTHENTICATION · ROLE-BASED ACCESS · AUDIT TRACE</footer>
 
+<script src="https://static.zohocdn.com/catalyst/sdk/js/4.4.0/catalystWebSDK.js"></script>
+<script src="/__catalyst/sdk/init.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 const API_URL = "/server/ksp_chatboy_function/execute";
 const SESSION_ID = "session-" + Math.random().toString(36).slice(2, 10);
+
+const AUTH_LOGIN_URL = "/__catalyst/auth/login";
+const IS_HOSTED_CATALYST = /\.catalystserverless\.(in|com)$/i.test(window.location.hostname);
+let authReady = !IS_HOSTED_CATALYST;
+let currentUser = null;
 
 const micBtn = document.getElementById("micBtn");
 const statusEl = document.getElementById("status");
@@ -1021,10 +1134,56 @@ const langEn = document.getElementById("langEn");
 const langKn = document.getElementById("langKn");
 const governanceBar = document.getElementById("governanceBar");
 const authNotice = document.getElementById("authNotice");
+const authGate = document.getElementById("authGate");
+const authGateBtn = document.getElementById("authGateBtn");
 
 let currentLang = "en-IN";
 let clientConversationContext = (() => { try { return JSON.parse(sessionStorage.getItem("vaani_context") || "{}"); } catch (_) { return {}; } })();
 let hotspotMap = null;
+
+function redirectToCatalystLogin() {
+  window.location.assign(AUTH_LOGIN_URL);
+}
+
+async function ensureCatalystAuth() {
+  if (!IS_HOSTED_CATALYST) {
+    authReady = true;
+    return true;
+  }
+
+  document.body.classList.add("auth-checking");
+  try {
+    if (!window.catalyst || !catalyst.auth) throw new Error("Catalyst Web SDK unavailable");
+    const result = await catalyst.auth.isUserAuthenticated();
+    if (!result || !result.content) {
+      authReady = false;
+      if (authGate) authGate.style.display = "flex"; authGate.style.setProperty("display", "flex", "important");
+      return false;
+    }
+
+    currentUser = result.content;
+    authReady = true;
+
+    if (governanceBar && currentUser) {
+      const role = currentUser.role_details?.role_name || currentUser.user_type || "Authenticated user";
+      governanceBar.className = "governance-bar ok";
+      governanceBar.textContent = `CATALYST AUTHENTICATED · ${role} · SECURE SESSION`;
+    }
+
+    if (authGate) authGate.style.display = "none"; authGate.style.setProperty("display", "none", "important");
+    return true;
+  } catch (err) {
+    console.error("Catalyst auth check failed:", err);
+    authReady = false;
+    if (authGate) authGate.style.display = "flex"; authGate.style.setProperty("display", "flex", "important");
+    return false;
+  } finally {
+    document.body.classList.remove("auth-checking");
+  }
+}
+
+authGateBtn?.addEventListener("click", redirectToCatalystLogin);
+ensureCatalystAuth();
 
 [langEn, langKn].forEach(btn => {
   btn.addEventListener("click", () => {
@@ -1119,6 +1278,10 @@ function renderGovernance(data) {
 
 
 async function sendQuery(text) {
+  if (IS_HOSTED_CATALYST && !authReady) {
+    const ok = await ensureCatalystAuth();
+    if (!ok) return;
+  }
   statusEl.textContent = "Retrieving case records…";
 
   try {
